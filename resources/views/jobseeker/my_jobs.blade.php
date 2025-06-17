@@ -416,15 +416,12 @@
 
 @section('page_content')
     <div class="jobs-container">
-        <!-- Filter Section -->
-        <div class="filter-section">
+        <div class="filter-section border p-3" style="display: none;max-height: 820px">
             <h5><i class="fas fa-filter"></i> Իմ հայտարարությունների ֆիլտրում</h5>
-
             <div class="filter-group">
                 <label for="filter_job_title">Աշխատանքի անվանում</label>
                 <input type="text" id="filter_job_title" class="filter-control" placeholder="Որոնել ըստ անվանման">
             </div>
-
             <div class="filter-group">
                 <label for="filter_employee_level">Աշխատողի մակարդակ</label>
                 <select id="filter_employee_level" class="filter-control">
@@ -473,13 +470,14 @@
                 </button>
             </div>
         </div>
-
+        <button id="toggle_filter_section" class="btn btn-dark" style="height: 40px">
+            <i class="fas fa-bars"></i>
+        </button>
         <!-- Results Section -->
         <div class="results-section">
             <div class="job-cards" id="cards_parent">
                 <!-- Job cards will be inserted here dynamically -->
             </div>
-
             <div id="empty-state" class="empty-state" style="display: none;">
                 <i class="fas fa-briefcase"></i>
                 <h4>Հայտարարություններ չեն գտնվել</h4>
@@ -716,6 +714,14 @@
                 $('#filter_sort').val('newest');
                 loadMyJobs({ sort: 'newest' });
                 localStorage.removeItem('myJobsFilters');
+            });
+        });
+        $(document).ready(function () {
+            $('#toggle_filter_section').on('click', function () {
+                $('.filter-section').slideToggle();
+
+                const icon = $(this).find('i');
+                icon.toggleClass('fa-bars fa-times');
             });
         });
     </script>
