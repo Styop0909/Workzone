@@ -2,7 +2,7 @@
 @extends('layouts.app')
 
 @section('page_title')
-    Dashboard
+    simon
 @endsection
 
 <style>
