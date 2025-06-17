@@ -72,7 +72,9 @@ class MessageController extends Controller
                 'receiver_name' => $msg->receiver->name ?? 'Unknown',
                 'created_at' => $msg->created_at->toDateTimeString(),
                 'is_file' => $msg->is_file ?? false,
-                'file_path' => $msg->file_path ?? null,
+                'file_path' => $msg->is_file
+                    ? asset('storage/' . ltrim(str_replace('public/', '', $msg->file_path), '/'))
+                    : null,
                 'filename' => $msg->is_file ? basename($msg->file_path) : null,
             ];
         });
@@ -140,7 +142,6 @@ class MessageController extends Controller
             ]
         ]);
     }
-    // MessageController.php
     public function recentChats()
     {
         $userId = auth()->id();

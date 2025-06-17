@@ -289,8 +289,6 @@
                 if (chats.length === 0) {
                     container.append('<span class="dropdown-item text-muted">Չկան նոր հաղորդագրություններ</span>');
                 }
-                console.log("Total chats:", chats.length);
-                console.log("Chat list:", chats);
                 const currentUserId = {{ auth()->id() }};
 
                 chats.forEach(chat => {
@@ -335,7 +333,6 @@
             let tryScroll = () => {
                 if (document.body.scrollHeight > window.innerHeight) {
                     window.scrollTo(0, parseInt(savedScroll));
-                    console.log("Scrolled to", savedScroll);
                 } else {
                     setTimeout(tryScroll, 100);
                 }

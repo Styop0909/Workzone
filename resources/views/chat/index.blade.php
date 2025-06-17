@@ -31,7 +31,7 @@
     #chat_messages {
         height: 400px;
         overflow-y: auto;
-        scroll-behavior: smooth; /* այսինքն scroll անելիս animation */
+        scroll-behavior: smooth;
     }
 
 </style>
@@ -138,8 +138,8 @@
             const diffDays = Math.floor(diffHours / 24);
             if (diffDays > 0) return `${diffDays} day(s) ago`;
             else if (diffHours > 0) return `${diffHours} hour(s) ago`;
-            else if (diffMinutes > 0) return `${diffMinutes} minute(s) ago`;
-            else return `${diffSeconds} second(s) ago`
+            else if (diffMinutes > 0) return `${diffMinutes} min(s) ago`;
+            else return `${diffSeconds} sec(s) ago`
         }
 
         function truncateText(text, maxLength = 20) {
@@ -175,7 +175,7 @@
                                     <span class="badge bg-warning badge-dot"></span>
                                 </div>
                                 <div class="pt-1">
-                                    <p class="fw-bold mb-0">${chat.receiver_name}</p>
+                                    <p class="fw-bold mb-0">${truncateText(chat.receiver_name,10)}</p>
                                     <p class="small text-muted">${short_message}</p>
                                 </div>
                             </div>
@@ -219,6 +219,8 @@
                     chatContainer.empty();
 
                     for (let msg of data) {
+
+
                         const isMine = msg.sender_id === currentUserId;
                         const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(isMine ? currentUserName : msg.sender_name)}&background=cccccc&color=ffffff`;
                         const timeAgo = getTimeSince(msg.created_at);
@@ -229,17 +231,16 @@
                             const filePath = msg.file_path || '';
                             const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'];
                             const ext = fileName.split('.').pop().toLowerCase();
-
                             if (imageExtensions.includes(ext)) {
                                 messageContent = `
                             <p class="mb-1">
-                                <a href="/storage/${filePath}" target="_blank">
-                                    <img src="/storage/${filePath}" alt="${fileName}" style="max-width:150px; max-height:150px; border-radius: 10px;"/>
+                                <a href="${filePath}" target="_blank">
+                                    <img src="${filePath}" alt="${fileName}" style="max-width:150px; max-height:150px; border-radius: 10px;"/>
                                 </a>
                             </p>
                         `;
                             } else {
-                                messageContent = `<p class="mb-1"><a href="/storage/${filePath}" target="_blank">📎 ${fileName}</a></p>`;
+                                messageContent = `<p class="mb-1"><a href="${filePath}" target="_blank">📎 ${fileName}</a></p>`;
                             }
                         } else {
                             messageContent = `<p class="mb-1">${msg.message}</p>`;
