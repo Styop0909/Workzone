@@ -609,6 +609,7 @@
                     method: 'GET',
                     data: filters,
                     success: function(data) {
+                        console.log(data)
                         clearTimeout(timeout); // Մաքրել timeout-ը, եթե տվյալները հաջողությամբ բեռնվել են
                         if (data.jobs && data.jobs.length > 0) {
                             if (filters.sort === 'oldest') {
