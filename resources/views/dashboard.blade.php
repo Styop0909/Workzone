@@ -2,7 +2,7 @@
 @extends('layouts.app')
 
 @section('page_title')
-    simonin
+    l000
 @endsection
 
 <style>
