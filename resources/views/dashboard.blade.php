@@ -1,8 +1,7 @@
-@php use Illuminate\Support\Facades\Auth; @endphp
 @extends('layouts.app')
 
 @section('page_title')
-    l 10
+    Dashboard
 @endsection
 
 <style>
