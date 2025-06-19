@@ -6,98 +6,110 @@
     /* Main Container */
     .jobs-container {
         display: flex;
+        flex-wrap: wrap;
         gap: 1.5rem;
-        min-height: calc(100vh - 120px);
         padding: 1.5rem 0;
-        position: relative;
     }
 
-    /* Filter Section */
+    /* Filter Section with Animation */
     .filter-section {
-        position: sticky;
-        top: 1rem;
-        width: 380px;
+        flex: 0 0 350px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e2e8f0;
         padding: 1.5rem;
-        background: #ffffff;
-        border-radius: 16px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-        transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-        z-index: 10;
+        height: fit-content;
+    }
+
+    .filter-section.collapsed {
+        transform: translateX(-100%);
         opacity: 0;
-        transform: translateY(10px);
-        animation: filterSlideIn 0.5s 0.2s forwards;
+        padding: 1.5rem 0;
+        width: 0;
+        overflow: hidden;
+        border: none;
+        box-shadow: none;
     }
 
-    @keyframes filterSlideIn {
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .filter-section:hover {
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
-    }
-
-    .filter-section h5 {
-        text-align: center;
-        margin-bottom: 1.5rem;
+    /* Filter Toggle Button */
+    .filter-toggle {
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        z-index: 30;
+        padding: 0.6rem 1rem;
+        border-radius: 12px;
+        background: #4A00E0;
+        color: #fff;
+        border: none;
         font-weight: 600;
-        color: #2d3748;
-        font-size: 1.3rem;
-        position: relative;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transition: 0.3s;
     }
 
-    .filter-section h5::after {
-        content: '';
-        position: absolute;
-        bottom: -8px;
-        left: 25%;
-        width: 50%;
-        height: 3px;
-        background: linear-gradient(90deg, #4299e1, #9f7aea);
-        border-radius: 3px;
-        transition: all 0.4s ease;
+
+    .filter-toggle:hover {
+        background: #8E2DE2;
+        transform: translateY(-2px);
     }
 
-    .filter-section:hover h5::after {
-        width: 60%;
-        left: 20%;
+    .filter-toggle i {
+        transition: transform 0.4s ease;
+    }
+
+    .filter-toggle.collapsed i {
+        transform: rotate(180deg);
+    }
+
+    .filter-content {
+        transition: opacity 0.2s ease 0.1s;
+    }
+
+    .filter-section.collapsed .filter-content {
+        opacity: 0;
+        transition: opacity 0.1s ease;
+    }
+
+    /* Results Section Animation */
+
+    .results-section {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .filter-section:not(.collapsed) + .results-section {
+        margin-left: 1.5rem;
     }
 
     .filter-group {
         margin-bottom: 1.25rem;
     }
 
+
     .filter-group label {
-        display: block;
-        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
         font-weight: 500;
-        color: #4a5568;
-        font-size: 0.95rem;
-        transition: all 0.3s ease;
+        margin-bottom: 0.4rem;
+        color: #2d3748;
+        display: block;
     }
 
     .filter-control {
         width: 100%;
-        padding: 0.75rem 1rem;
-        border: 1px solid rgba(226, 232, 240, 0.8);
-        border-radius: 10px;
-        font-size: 0.95rem;
-        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-        background-color: rgba(248, 250, 252, 0.8);
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        background: #f7fafc;
     }
+
 
     .filter-control:focus {
-        border-color: #4299e1;
-        box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+        border-color: #667eea;
         outline: none;
-        background-color: white;
-        transform: translateY(-1px);
-    }
-
-    .filter-control:hover {
-        border-color: #c3dafe;
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
     }
 
     /* Buttons */
@@ -107,67 +119,45 @@
         border-radius: 12px;
         font-weight: 600;
         font-size: 0.95rem;
-        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 0.5rem;
+        transition: all 0.3s ease;
     }
+
 
     .btn-primary {
-        background: linear-gradient(135deg, #4299e1, #3182ce);
+        background: linear-gradient(to right, #667eea, #764ba2);
         color: white;
         border: none;
-        box-shadow: 0 4px 12px rgba(66, 153, 225, 0.2);
-    }
-
-    .btn-primary:hover {
-        background: linear-gradient(135deg, #3182ce, #2b6cb0);
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(66, 153, 225, 0.3);
     }
 
     .btn-secondary {
-        background: linear-gradient(135deg, #718096, #4a5568);
+        background: linear-gradient(to right, #a0aec0, #718096);
         color: white;
         border: none;
-        box-shadow: 0 4px 12px rgba(113, 128, 150, 0.2);
     }
 
+    .btn-primary:hover,
     .btn-secondary:hover {
-        background: linear-gradient(135deg, #4a5568, #2d3748);
         transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(113, 128, 150, 0.3);
     }
 
-    /* Results Section */
-    .results-section {
-        flex: 1;
-        opacity: 0;
-        transform: translateY(10px);
-        animation: contentFadeIn 0.5s 0.4s forwards;
-    }
-
-    @keyframes contentFadeIn {
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
+    /* Job Cards */
     .job-cards {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-        gap: 1.5rem;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.25rem;
     }
 
-    /* Job Card */
     .job-card {
-        background: #ffffff;
+        background: white;
         border-radius: 16px;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
         overflow: hidden;
-        transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        border: 1px solid rgba(237, 242, 247, 0.8);
+        transition: all 0.3s ease;
         opacity: 0;
         transform: translateY(20px);
         animation: cardAppear 0.6s forwards;
@@ -182,18 +172,13 @@
     }
 
     .job-card:hover {
+        transform: translateY(-5px);
         box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
     }
 
     .job-card-header {
         padding: 1.25rem 1.5rem;
         border-bottom: 1px solid rgba(237, 242, 247, 0.8);
-        background: linear-gradient(135deg, rgba(248, 250, 252, 0.8), white);
-        transition: all 0.3s ease;
-    }
-
-    .job-card:hover .job-card-header {
-        background: linear-gradient(135deg, rgba(226, 232, 240, 0.8), white);
     }
 
     .job-card-header h4 {
@@ -201,15 +186,11 @@
         font-weight: 600;
         color: #2d3748;
         font-size: 1.2rem;
-        transition: all 0.3s ease;
-    }
-
-    .job-card:hover .job-card-header h4 {
-        color: #1a365d;
     }
 
     .job-card-body {
         padding: 1.5rem;
+        color: #4a5568;
     }
 
     .job-meta {
@@ -222,7 +203,6 @@
         display: flex;
         align-items: center;
         font-size: 0.9rem;
-        color: #4a5568;
     }
 
     .job-meta-item i {
@@ -235,27 +215,22 @@
     .job-card-footer {
         display: flex;
         padding: 1rem;
-        background-color: rgba(248, 250, 252, 0.8);
         border-top: 1px solid rgba(237, 242, 247, 0.8);
-        transition: all 0.3s ease;
-    }
-
-    .job-card:hover .job-card-footer {
-        background-color: rgba(226, 232, 240, 0.8);
+        gap: 30px;
     }
 
     .job-action {
         flex: 1;
         text-align: center;
-        padding: 0.6rem;
-        border-radius: 8px;
-        font-size: 0.85rem;
-        font-weight: 500;
-        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        padding: 0.75rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.7rem;
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 0.5rem;
+        transition: all 0.3s ease;
     }
 
     .job-action:hover {
@@ -263,27 +238,21 @@
     }
 
     .action-view {
-        color: #4299e1;
-    }
-
-    .action-view:hover {
-        background-color: rgba(66, 153, 225, 0.1);
+        background: linear-gradient(135deg, #63b3ed, #4299e1);
+        color: white;
+        text-decoration: none;
     }
 
     .action-edit {
-        color: #d69e2e;
-    }
-
-    .action-edit:hover {
-        background-color: rgba(214, 158, 46, 0.1);
+        background: linear-gradient(135deg, #f6e05e, #d69e2e);
+        color: #744210;
+        text-decoration: none;
     }
 
     .action-delete {
-        color: #f56565;
-    }
-
-    .action-delete:hover {
-        background-color: rgba(245, 101, 101, 0.1);
+        background: linear-gradient(135deg, #f56565, #e53e3e);
+        color: white;
+        border: none;
     }
 
     /* Loading Overlay */
@@ -293,15 +262,38 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(255, 255, 255, 0.95);
+        background: rgba(255,255,255,0.9);
         display: flex;
         justify-content: center;
         align-items: center;
-        z-index: 9999;
-        backdrop-filter: blur(8px);
-        transition: opacity 0.4s ease;
+        z-index: 10000;
+    }
+    .modal .modal-content {
+        border-radius: 12px;
     }
 
+    #alertPlaceholder {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        z-index: 1055;
+        min-width: 280px;
+    }
+
+    @media (max-width: 992px) {
+        .jobs-container {
+            flex-direction: column;
+        }
+
+        .filter-section {
+            width: 100%;
+            position: static;
+        }
+
+        .filter-toggle {
+            display: none;
+        }
+    }
     .dots-loader {
         display: inline-block;
         position: relative;
@@ -317,7 +309,6 @@
         border-radius: 50%;
         background: linear-gradient(135deg, #4299e1, #9f7aea);
         animation-timing-function: cubic-bezier(0, 1, 1, 0);
-        box-shadow: 0 4px 12px rgba(66, 153, 225, 0.4);
     }
 
     .dots-loader div:nth-child(1) {
@@ -360,14 +351,13 @@
         font-size: 1.1rem;
         color: #4a5568;
         font-weight: 500;
-        text-align: center;
     }
 
     /* Empty State */
     .empty-state {
+        padding: 2rem;
         text-align: center;
-        padding: 3rem;
-        width: 100%;
+        color: #718096;
     }
 
     .empty-state i {
@@ -386,6 +376,15 @@
         color: #a0aec0;
     }
 
+    /* Alert Notifications */
+    #alertPlaceholder {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        z-index: 1055;
+        min-width: 300px;
+    }
+
     /* Responsive */
     @media (max-width: 1200px) {
         .jobs-container {
@@ -394,11 +393,37 @@
 
         .filter-section {
             position: static;
-            width: 100%;
+            width: 100% !important;
+            transform: none !important;
+            opacity: 1 !important;
+            padding: 1.5rem !important;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-toggle {
+            display: none;
+        }
+
+        .filter-section:not(.collapsed) + .results-section {
+            margin-left: 0;
         }
     }
-
     @media (max-width: 768px) {
+        .filter-toggle {
+            top: auto;
+            bottom: 1rem;
+            left: 1rem;
+        }
+        .filter-section {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            z-index: 20;
+            background: white;
+        }
+    }
+        @media (max-width: 768px) {
         .job-cards {
             grid-template-columns: 1fr;
         }
@@ -415,64 +440,69 @@
 </style>
 
 @section('page_content')
+
     <div class="jobs-container">
-        <div class="filter-section border p-3" style="display: none;max-height: 820px">
-            <h5><i class="fas fa-filter"></i> Իմ հայտարարությունների ֆիլտրում</h5>
-            <div class="filter-group">
-                <label for="filter_job_title">Աշխատանքի անվանում</label>
-                <input type="text" id="filter_job_title" class="filter-control" placeholder="Որոնել ըստ անվանման">
-            </div>
-            <div class="filter-group">
-                <label for="filter_employee_level">Աշխատողի մակարդակ</label>
-                <select id="filter_employee_level" class="filter-control">
-                    <option value="">Բոլոր մակարդակները</option>
-                    <option value="1">1 — Սկսնակ</option>
-                    <option value="2">2 — Միջին</option>
-                    <option value="3">3 — Ավագ</option>
-                    <option value="4">4 — Չնշված</option>
-                </select>
-            </div>
+        <button class="filter-toggle" id="filterToggle">
+            <i class="fas fa-filter"></i>
+            <span>Ֆիլտր</span>
+        </button>
+<div class="filter-section" id="filterSection">
+            <div class="filter-content">
+                <h5><i class="fas fa-filter"></i>ֆիլտրում</h5>
+                <div class="filter-group">
+                    <label for="filter_job_title">Աշխատանքի անվանում</label>
+                    <input type="text" id="filter_job_title" class="filter-control" placeholder="Որոնել ըստ անվանման">
+                </div>
+                <div class="filter-group">
+                    <label for="filter_employee_level">Աշխատողի մակարդակ</label>
+                    <select id="filter_employee_level" class="filter-control">
+                        <option value="">Բոլոր մակարդակները</option>
+                        <option value="1">1 — Սկսնակ</option>
+                        <option value="2">2 — Միջին</option>
+                        <option value="3">3 — Ավագ</option>
+                        <option value="4">4 — Չնշված</option>
+                    </select>
+                </div>
 
-            <div class="filter-group">
-                <label for="filter_work_experience">Աշխատանքային փորձ (տարի)</label>
-                <input type="number" id="filter_work_experience" class="filter-control" min="0" max="50" placeholder="0">
-            </div>
+                <div class="filter-group">
+                    <label for="filter_work_experience">Աշխատանքային փորձ (տարի)</label>
+                    <input type="number" id="filter_work_experience" class="filter-control" min="0" max="50" placeholder="0">
+                </div>
 
-            <div class="filter-group">
-                <label for="filter_work_hours">Աշխատանքային ժամեր (օրական)</label>
-                <input type="number" id="filter_work_hours" class="filter-control" min="0" max="24" placeholder="0">
-            </div>
+                <div class="filter-group">
+                    <label for="filter_work_hours">Աշխատանքային ժամեր (օրական)</label>
+                    <input type="number" id="filter_work_hours" class="filter-control" min="0" max="24" placeholder="0">
+                </div>
 
-            <div class="filter-group">
-                <label for="filter_work_format">Աշխատանքի ձևաչափ</label>
-                <select id="filter_work_format" class="filter-control">
-                    <option value="">Բոլոր ձևաչափերը</option>
-                    <option value="1">1 — Հեռավար</option>
-                    <option value="2">2 — Աշխ. վայրում</option>
-                    <option value="3">3 — Հիբրիդ</option>
-                </select>
-            </div>
+                <div class="filter-group">
+                    <label for="filter_work_format">Աշխատանքի ձևաչափ</label>
+                    <select id="filter_work_format" class="filter-control">
+                        <option value="">Բոլոր ձևաչափերը</option>
+                        <option value="1">1 — Հեռավար</option>
+                        <option value="2">2 — Աշխ. վայրում</option>
+                        <option value="3">3 — Հիբրիդ</option>
+                    </select>
+                </div>
 
-            <div class="filter-group">
-                <label for="filter_sort">Դասավորել ըստ</label>
-                <select id="filter_sort" class="filter-control">
-                    <option value="newest">Նոր հայտարարությունների</option>
-                    <option value="oldest">Հին հայտարարությունների</option>
-                </select>
-            </div>
+                <div class="filter-group">
+                    <label for="filter_sort">Դասավորել ըստ</label>
+                    <select id="filter_sort" class="filter-control">
+                        <option value="newest">Նոր հայտարարությունների</option>
+                        <option value="oldest">Հին հայտարարությունների</option>
+                    </select>
+                </div>
 
-            <div class="filter-actions mt-3">
-                <button id="filter_btn" class="btn-filter btn-primary">
-                    <i class="fas fa-search"></i> Ֆիլտրել
-                </button>
-                <button id="clear_filters" class="btn-filter btn-secondary mt-2">
-                    <i class="fas fa-broom"></i> Մաքրել ֆիլտրերը
-                </button>
+                <div class="filter-actions mt-3">
+                    <button id="filter_btn" class="btn-filter btn-primary">
+                        <i class="fas fa-search"></i> Ֆիլտրել
+                    </button>
+                    <button id="clear_filters" class="btn-filter btn-secondary mt-2">
+                        <i class="fas fa-broom"></i> Մաքրել ֆիլտրերը
+                    </button>
+                </div>
             </div>
         </div>
-        <button id="toggle_filter_section" class="btn btn-dark" style="height: 40px">
-            <i class="fas fa-bars"></i>
-        </button>
+
         <!-- Results Section -->
         <div class="results-section">
             <div class="job-cards" id="cards_parent">
@@ -481,13 +511,22 @@
             <div id="empty-state" class="empty-state" style="display: none;">
                 <i class="fas fa-briefcase"></i>
                 <h4>Հայտարարություններ չեն գտնվել</h4>
-                <p>Փորձեք փոխել ձեր ֆիլտրերը</p>
+                <p>Դուք չունեք Հայտարարություններ</p>
             </div>
         </div>
     </div>
 
-    <!-- Loading Overlay -->
-
+    <div class="loading-overlay" id="loading-spinner" style="display: none;">
+        <div class="spinner-container">
+            <div class="dots-loader">
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+            <div class="loading-text">Բեռնվում է...</div>
+        </div>
+    </div>
 
     <!-- Delete Confirmation Modal -->
     <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
@@ -509,7 +548,7 @@
     </div>
 
     <!-- Alert Notifications -->
-    <div id="alertPlaceholder" style="position: fixed; top: 1rem; right: 1rem; z-index: 1055; min-width: 300px;"></div>
+    <div id="alertPlaceholder"></div>
 @endsection
 
 @section('page_script')
@@ -522,16 +561,31 @@
             const deleteModal = new bootstrap.Modal('#deleteConfirmModal');
             let deleteJobId = null;
 
+            $('#filterToggle').on('click', function() {
+                const $filterSection = $('#filterSection');
+                const $toggleBtn = $(this);
+
+                $filterSection.toggleClass('collapsed');
+                $toggleBtn.toggleClass('collapsed');
+
+                // Store state
+                localStorage.setItem('filterCollapsed', $filterSection.hasClass('collapsed'));
+            });
+
+            if (localStorage.getItem('filterCollapsed') === 'true') {
+                $('#filterSection').addClass('collapsed');
+                $('#filterToggle').addClass('collapsed');
+            }
+
             function showAlert(message, type = 'success') {
                 const wrapper = $(`
-                <div class="alert alert-${type} alert-dismissible fade show" role="alert" style="box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
-                    ${message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            `);
+                    <div class="alert alert-${type} alert-dismissible fade show" role="alert" style="box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+                        ${message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                `);
                 alertPlaceholder.append(wrapper);
 
-                // Smooth fade out
                 setTimeout(() => {
                     $(wrapper).fadeOut(400, () => wrapper.remove());
                 }, 3000);
@@ -549,43 +603,43 @@
 
                 jobs.forEach((job, index) => {
                     const jobCard = $(`
-                    <div class="job-card" data-id="${job.id}" style="--delay: ${index}">
-                        <div class="job-card-header">
-                            <h4>${job.job_title}</h4>
-                        </div>
-                        <div class="job-card-body">
-                            <div class="job-meta">
-                                <div class="job-meta-item">
-                                    <i class="fas fa-layer-group"></i>
-                                    <span>Մակարդակ: ${levels[job.employee_level] || job.employee_level}</span>
-                                </div>
-                                <div class="job-meta-item">
-                                    <i class="fas fa-briefcase"></i>
-                                    <span>Փորձ: ${job.work_experience || 0} տարի</span>
-                                </div>
-                                <div class="job-meta-item">
-                                    <i class="fas fa-clock"></i>
-                                    <span>Ժամեր: ${job.working_hours || 0} ժամ</span>
-                                </div>
-                                <div class="job-meta-item">
-                                    <i class="fas fa-laptop-house"></i>
-                                    <span>Ձևաչափ: ${formats[job.work_format] || job.work_format}</span>
+                        <div class="job-card" data-id="${job.id}" style="--delay: ${index}">
+                            <div class="job-card-header">
+                                <h4>${job.job_title}</h4>
+                            </div>
+                            <div class="job-card-body">
+                                <div class="job-meta">
+                                    <div class="job-meta-item">
+                                        <i class="fas fa-layer-group"></i>
+                                        <span>Մակարդակ: ${levels[job.employee_level] || job.employee_level}</span>
+                                    </div>
+                                    <div class="job-meta-item">
+                                        <i class="fas fa-briefcase"></i>
+                                        <span>Փորձ: ${job.work_experience || 0} տարի</span>
+                                    </div>
+                                    <div class="job-meta-item">
+                                        <i class="fas fa-clock"></i>
+                                        <span>Ժամեր: ${job.working_hours || 0} ժամ</span>
+                                    </div>
+                                    <div class="job-meta-item">
+                                        <i class="fas fa-laptop-house"></i>
+                                        <span>Ձևաչափ: ${formats[job.work_format] || job.work_format}</span>
+                                    </div>
                                 </div>
                             </div>
+                            <div class="job-card-footer">
+                                <a href="/jobs/${job.id}/show" class="job-action action-view">
+                                    <i class="fas fa-eye"></i> Դիտել
+                                </a>
+                                <a href="/jobs/${job.id}/edit" class="job-action action-edit">
+                                    <i class="fas fa-edit"></i> Խմբագրել
+                                </a>
+                                <button class="job-action action-delete delete-btn" data-id="${job.id}">
+                                    <i class="fas fa-trash"></i> Ջնջել
+                                </button>
+                            </div>
                         </div>
-                        <div class="job-card-footer">
-                            <a href="/jobs/${job.id}/show" class="job-action action-view">
-                                <i class="fas fa-eye"></i> Դիտել
-                            </a>
-                            <a href="/jobs/${job.id}/edit" class="job-action action-edit">
-                                <i class="fas fa-edit"></i> Խմբագրել
-                            </a>
-                            <button class="job-action action-delete delete-btn" data-id="${job.id}">
-                                <i class="fas fa-trash"></i> Ջնջել
-                            </button>
-                        </div>
-                    </div>
-                `);
+                    `);
                     cardsParent.append(jobCard);
                 });
             }
@@ -594,14 +648,12 @@
                 loadingSpinner.fadeIn(300);
                 cardsParent.css('opacity', '0.7');
 
-                // Սահմանել timeout (օրինակ 10 վայրկյան)
                 const timeout = setTimeout(() => {
                     loadingSpinner.fadeOut(300);
                     cardsParent.css('opacity', '1');
                     showAlert('Բեռնումը ժամանակավորապես խափանված է։ Խնդրում ենք փորձել ավելի ուշ։', 'warning');
-                }, 10000); // 10000 միլիվայրկյան = 10 վայրկյան
+                }, 10000);
 
-                // Միշտ ֆիլտրել ըստ ընթացիկ օգտատիրոջ
                 filters.creator_id = {{ auth()->id() }};
 
                 $.ajax({
@@ -609,12 +661,12 @@
                     method: 'GET',
                     data: filters,
                     success: function(data) {
-                        clearTimeout(timeout); // Մաքրել timeout-ը, եթե տվյալները հաջողությամբ բեռնվել են
-                        if (data.jobs && data.jobs.length > 0) {
+                        clearTimeout(timeout);
+                        if (Array.isArray(data.jobs) && data.jobs.length > 0)
+                        {
                             if (filters.sort === 'oldest') {
                                 data.jobs.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
                             } else {
-                                // Լռելյայն՝ նորերը առաջինը
                                 data.jobs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
                             }
                             renderJobs(data.jobs, data.levels, data.formats);
@@ -623,7 +675,7 @@
                         }
                     },
                     error: function(xhr) {
-                        clearTimeout(timeout); // Մաքրել timeout-ը սխալի դեպքում
+                        clearTimeout(timeout);
                         console.error("Filter error:", xhr.responseText);
                         showAlert('Ֆիլտրման սխալ։ Խնդրում ենք փորձել ավելի ուշ։', 'danger');
                     },
@@ -702,27 +754,20 @@
                 return null;
             }
 
-            const savedFilters = restoreFilters();
-            if (savedFilters) {
-                loadMyJobs(savedFilters);
-            } else {
-                loadMyJobs({ sort: 'newest' });
-            }
-
             $('#clear_filters').on('click', function() {
                 $('.filter-control').val('');
                 $('#filter_sort').val('newest');
                 loadMyJobs({ sort: 'newest' });
                 localStorage.removeItem('myJobsFilters');
             });
-        });
-        $(document).ready(function () {
-            $('#toggle_filter_section').on('click', function () {
-                $('.filter-section').slideToggle();
 
-                const icon = $(this).find('i');
-                icon.toggleClass('fa-bars fa-times');
-            });
+            // Load jobs on page load
+            const savedFilters = restoreFilters();
+            if (savedFilters) {
+                loadMyJobs(savedFilters);
+            } else {
+                loadMyJobs({ sort: 'newest' });
+            }
         });
     </script>
 @endsection

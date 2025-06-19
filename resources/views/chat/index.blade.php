@@ -236,7 +236,7 @@
                             <p class="mb-1">
                                 <a href="${filePath}" target="_blank">
                                     <img src="${filePath}" alt="${fileName}" style="max-width:150px; max-height:150px; border-radius: 10px;"/>
-                                </a>
+                                  </a>
                             </p>
                         `;
                             } else {

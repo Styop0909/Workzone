@@ -4,27 +4,33 @@ namespace App\Http\Controllers;
 
 use App\Models\Message;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Job;
 use App\Models\Workplace;
 use Illuminate\Http\Request;
 
 class JobController extends Controller
 {
-    public function index_view()
+    public function index_view(Request $request)
     {
-        return view("jobseeker.jobseeker");
+        $job_title = $request->query('job_title', '');
+        $filters = $request->only(['job_title' => $job_title,]);
+        return view("jobseeker.jobseeker", compact('filters'));
     }
-    public function index(Request $request)
+    public function autosearch(Request $request)
     {
-        $jobs = Workplace::with("user")->get()->toArray();
+        $query = Workplace::query();
+
+        if ($request->filled('search')) {
+            $query->where('job_title', 'like', '%'.$request->search.'%');
+        }
+
+        $jobs = $query->orderBy('created_at', 'DESC')->get();
+
         return response()->json([
             'jobs' => $jobs,
             'levels' => config('job.levels'),
-            'formats' => config('job.formats'),
+            'formats' => config('job.formats')
         ]);
     }
-
-
     public function show($id)
     {
         $job = Workplace::with("user")->findOrFail($id);
@@ -61,6 +67,9 @@ class JobController extends Controller
     {
         $query = Workplace::query();
 
+        if ($request->filled('creator_id')) {
+            $query->where('job_creator_id', $request->creator_id);
+        }
         if ($request->filled('job_title')) {
             $query->where('job_title', 'like', '%' . $request->job_title . '%');
         }
@@ -166,7 +175,7 @@ class JobController extends Controller
     }
     public function my_jobs()
     {
-        $my_id = Auth::user()->id;
+        $my_id = auth()->id();
         $my_jobs = Workplace::where('job_creator_id', $my_id)->latest()->get();
         return response()->json([
             "data" => $my_jobs,

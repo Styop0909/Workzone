@@ -27,8 +27,56 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/emoji-button@4.6.3/dist/index.min.css">
     <script src="https://cdn.jsdelivr.net/npm/emoji-button@4.6.3/dist/index.min.js"></script>
 <style>
+    #globalSearchForm {
+        gap: 0.5rem;
+        border: 1px solid #ced4da;
+        border-radius: 999px;
+        padding: 0.25rem 0.5rem;
+        background: white;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
 
+    #globalSearchForm:focus-within {
+        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+        border-color: #0d6efd;
+    }
 
+    #globalSearchForm input[type="text"] {
+        border: none;
+        outline: none;
+        box-shadow: none;
+        background: transparent;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.9rem;
+        width: 160px;
+        transition: width 0.3s ease;
+    }
+
+    #globalSearchForm input[type="text"]:focus {
+        width: 200px;
+    }
+
+    #globalSearchForm button {
+        border: none;
+        background: #0d6efd;
+        color: white;
+        padding: 0.35rem 0.6rem;
+        border-radius: 999px;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.3s ease;
+    }
+
+    #globalSearchForm button:hover {
+        background: #0b5ed7;
+    }
+    .app-header{
+        position: sticky;
+        top: 0;
+    }
 </style>
 </head>
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
@@ -45,11 +93,17 @@
                 </li>
             </ul>
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
-                    <a class="nav-link" data-widget="navbar-search" href="#" role="button">
-                        <i class="bi bi-search"></i>
-                    </a>
+                <li class="nav-item d-flex align-items-center">
+                    <form id="globalSearchForm" class="d-flex" role="search">
+                        <input type="text" id="job_search_input" placeholder="Որոնել աշխատանքը..." class="form-control">
+                        <button type="submit">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </form>
+                    <input type="hidden" id="job_title_filter_input" name="job_title">
                 </li>
+
+
                 @auth
                     <li class="nav-item dropdown" id="chat-dropdown">
                         <a class="nav-link" data-bs-toggle="dropdown" href="#">
@@ -344,6 +398,53 @@
             localStorage.setItem("scrollTop", window.scrollY);
         });
     });
+    document.getElementById("globalSearchForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        const search = document.getElementById("job_search_input").value.trim();
+        const url = new URL("{{ route('jobs.index') }}", window.location.origin);
+        if (search) {
+            url.searchParams.set('job_title', search);
+        }
+        window.location.href = url.toString();
+    });
+    $(document).ready(function () {
+        let searchTimeout;
+
+        $('#job_search_input').on('input', function () {
+            clearTimeout(searchTimeout);
+
+            searchTimeout = setTimeout(function () {
+                const title = $('#job_search_input').val();
+                $('#job_title_filter_input').val(title);
+                loadJobs(filters);
+            }, 400);
+        });
+    });
+    function renderJobCards(jobs) {
+        const container = $('#jobs_container');
+        container.empty();
+
+        if (jobs.length === 0) {
+            container.append('<p class="text-muted">Չկան համապատասխան աշխատանքներ։</p>');
+            return;
+        }
+
+        jobs.forEach(job => {
+            const card = `
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">${job.job_title}</h5>
+                    <p class="card-text"><strong>Մակարդակ:</strong> ${job.employee_level}</p>
+                    <p class="card-text"><strong>Փորձ:</strong> ${job.work_experience} տարի</p>
+                    <p class="card-text"><strong>Ժամեր:</strong> ${job.working_hours}</p>
+                    <p class="card-text"><strong>Ձևաչափ:</strong> ${job.work_format}</p>
+                </div>
+            </div>
+        `;
+            container.append(card);
+        });
+    }
+
 </script>
 @yield("page_script")
 
