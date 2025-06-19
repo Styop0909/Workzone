@@ -2,7 +2,7 @@
 @extends('layouts.app')
 
 @section('page_title')
-    l000
+    axper karas pul anes qo main um
 @endsection
 
 <style>
