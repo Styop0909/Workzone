@@ -2,7 +2,10 @@
 
 @section('page_title')
     Dashboard
+<<<<<<< HEAD
 
+=======
+>>>>>>> 0d3f5e5 (a)
 @endsection
 
 <style>
