@@ -263,6 +263,27 @@
         gap: 0.5rem;
     }
 
+    .pagination-container ul {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .pagination-container a,
+    .pagination-container span {
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        color: #4299e1;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .pagination-container a:hover {
+        background-color: #ebf8ff;
+    }
+
+
     .job-card-footer .btn-delete {
         background: linear-gradient(135deg, #f56565, #e53e3e);
         color: white;
@@ -534,24 +555,83 @@
 @endsection
 @section('page_script')
     <script>
+        function renderJobs(jobs, levelMap = {}, formatMap = {}, paginationHTML = '') {
+            const cardsParent = $("#cards_parent");
+            cardsParent.empty();
+            if (!jobs || jobs.length === 0) {
+                cardsParent.html(`
+            <div class="job-card" style="flex: 1 1 100%; max-width: 100%; text-align: center; padding: 2rem; opacity: 1;">
+                <div class="job-card-body">
+                    <i class="fas fa-briefcase" style="font-size: 3rem; color: #cbd5e0; margin-bottom: 1rem;"></i>
+                    <h4 style="color: #718096;">Աշխատանքային հայտարարություններ չեն գտնվել</h4>
+                    <p style="color: #a0aec0;">Փորձեք փոխել ձեր ֆիլտրերը</p>
+                </div>
+            </div>
+        `);
+                return;
+            }
+
+            jobs.forEach((job, index) => {
+                const experience = job.work_experience ?? 0;
+                const hours = job.working_hours ?? 0;
+
+                const jobCard = $(`
+            <div class="job-card" data-id="${job.id}" style="--delay: ${index}">
+                <div class="job-card-header">
+                    <h4>${job.job_title}</h4>
+                </div>
+                <div class="job-card-body">
+                    <p><strong>Մակարդակ:</strong> ${levelMap[job.employee_level] || job.employee_level}</p>
+                    <p><strong>Փորձ:</strong> ${experience} տարի</p>
+                    <p><strong>Ժամեր:</strong> ${hours} ժամ</p>
+                    <p><strong>Ձևաչափ:</strong> ${formatMap[job.work_format] || job.work_format}</p>
+                </div>
+                <div class="job-card-footer">
+                    ${(job.job_creator_id == currentUserId || currentUserRole === "1") ? `
+                        <button type="button" class="btn btn-danger delete-btn" data-id="${job.id}">
+                            <i class="fas fa-trash"></i> Ջնջել
+                        </button>
+                        <a href="/jobs/${job.id}/edit" class="btn btn-edit">
+                            <i class="fas fa-edit"></i> Խմբագրել
+                        </a>` : ''}
+                    <a href="/jobs/${job.id}/show" class="btn btn-view">
+                        <i class="fas fa-eye"></i> Դիտել
+                    </a>
+                </div>
+            </div>
+        `);
+
+                cardsParent.append(jobCard);
+            });
+
+            if (paginationHTML) {
+                cardsParent.append(`
+            <div class="pagination-container" style="width: 100%; text-align: center; margin-top: 1rem;">
+                ${paginationHTML}
+            </div>
+        `);
+            }
+        }
+
+        const currentUserId = {{ auth()->id() }};
+        const currentUserRole = "{{ auth()->user()->user_role }}";
+
         $(document).ready(function () {
             const cardsParent = $("#cards_parent");
             const alertPlaceholder = $('#alertPlaceholder');
             const deleteModalEl = document.getElementById('deleteConfirmModal');
             const deleteModal = new bootstrap.Modal(deleteModalEl);
-            const currentUserId = {{ auth()->id() }};
-            const currentUserRole = "{{ auth()->user()->user_role }}";
             let deleteJobId = null;
             let searchTimeout;
 
             function showAlert(message, type = 'success') {
                 const wrapper = document.createElement('div');
                 wrapper.innerHTML = `
-                <div class="alert alert-${type} alert-dismissible fade show" role="alert" style="box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
-                    ${message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-                `;
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert" style="box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        `;
                 alertPlaceholder.append(wrapper);
 
                 setTimeout(() => {
@@ -559,76 +639,26 @@
                 }, 3000);
             }
 
-            function renderJobs(jobs, levelMap = {}, formatMap = {}) {
-                cardsParent.empty();
-
-                if (!jobs || jobs.length === 0) {
-                    cardsParent.html(`
-                    <div class="job-card" style="flex: 1 1 100%; max-width: 100%; text-align: center; padding: 2rem; opacity: 1;">
-                        <div class="job-card-body">
-                            <i class="fas fa-briefcase" style="font-size: 3rem; color: #cbd5e0; margin-bottom: 1rem;"></i>
-                            <h4 style="color: #718096;">Աշխատանքային հայտարարություններ չեն գտնվել</h4>
-                            <p style="color: #a0aec0;">Փորձեք փոխել ձեր ֆիլտրերը</p>
-                        </div>
-                    </div>
-                    `);
-                    return;
-                }
-
-                jobs.forEach((job, index) => {
-                    const experience = job.work_experience !== undefined ? job.work_experience : 0;
-                    const hours = job.working_hours !== undefined ? job.working_hours : 0;
-                    const jobCard = $(`
-                    <div class="job-card" data-id="${job.id}" style="--delay: ${index}">
-                        <div class="job-card-header">
-                            <h4>${job.job_title}</h4>
-                        </div>
-                        <div class="job-card-body">
-                            <p><strong>Մակարդակ:</strong> ${levelMap[job.employee_level] || job.employee_level}</p>
-                            <p><strong>Փորձ:</strong> ${experience} տարի</p>
-                            <p><strong>Ժամեր:</strong> ${hours} ժամ</p>
-                            <p><strong>Ձևաչափ:</strong> ${formatMap[job.work_format] || job.work_format}</p>
-                        </div>
-                        <div class="job-card-footer">
-                            ${job.job_creator_id == currentUserId || currentUserRole === "1" ? `
-                                <button type="button" class="btn btn-danger delete-btn" data-id="${job.id}">
-                                    <i class="fas fa-trash"></i> Ջնջել
-                                </button>
-                                <a href="/jobs/${job.id}/edit" class="btn btn-edit">
-                                    <i class="fas fa-edit"></i> Խմբագրել
-                                </a>
-                            ` : ''}
-                            <a href="/jobs/${job.id}/show" class="btn btn-view">
-                                <i class="fas fa-eye"></i> Դիտել
-                            </a>
-                        </div>
-                    </div>
-                    `);
-                    cardsParent.append(jobCard);
-                });
-            }
-
             function performSearch(searchText) {
                 clearTimeout(searchTimeout);
                 searchTimeout = setTimeout(() => {
-                    $('#cards_parent').css('opacity', '0.5');
+                    cardsParent.css('opacity', '0.5');
 
                     $.ajax({
                         url: '/jobs/autosearch',
                         method: 'GET',
                         data: { search: searchText },
                         success: function(data) {
-                            renderJobs(data.jobs, data.levels, data.formats);
-                            // Update URL without reload
+                            renderJobs(data.jobs, data.levels, data.formats, data.links);
                             const queryString = new URLSearchParams();
                             if (searchText) queryString.append('job_title', searchText);
                             history.replaceState(null, null, `?${queryString.toString()}`);
                         },
                         complete: function() {
-                            $('#cards_parent').css('opacity', '1');
+                            cardsParent.css('opacity', '1');
                         }
                     });
-                }, 500); // 500ms debounce
+                }, 500);
             }
 
             $('#job_search_input').on('input', function() {
@@ -704,7 +734,7 @@
             });
 
             function loadJobsWithAllFilters(filters = {}) {
-                $('#cards_parent').css('opacity', '0.5');
+                cardsParent.css('opacity', '0.5');
 
                 $.ajax({
                     url: '/jobs/filter',
@@ -714,7 +744,7 @@
                         renderJobs(data.jobs, data.levels, data.formats);
                     },
                     complete: function() {
-                        $('#cards_parent').css('opacity', '1');
+                        cardsParent.css('opacity', '1');
                     }
                 });
             }
@@ -724,6 +754,21 @@
                 $('.job-filter select').val('');
                 localStorage.removeItem('jobFilters');
                 performSearch('');
+            });
+        });
+
+        // ✅ Սա թող մնա այսպես, դուրս
+        $(document).on('click', '.pagination a', function(e) {
+            e.preventDefault();
+            const url = $(this).attr('href');
+            if (!url) return;
+
+            $('#cards_parent').css('opacity', '0.5');
+
+            $.get(url, function(data) {
+                renderJobs(data.jobs, data.levels, data.formats, data.links);
+            }).always(() => {
+                $('#cards_parent').css('opacity', '1');
             });
         });
     </script>

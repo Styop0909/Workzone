@@ -547,154 +547,149 @@
         </div>
     </div>
 
-    <!-- Alert Notifications -->
     <div id="alertPlaceholder"></div>
 @endsection
 
 @section('page_script')
     <script>
-        $(document).ready(function () {
-            const cardsParent = $("#cards_parent");
-            const loadingSpinner = $('#loading-spinner');
-            const emptyState = $('#empty-state');
-            const alertPlaceholder = $('#alertPlaceholder');
-            const deleteModal = new bootstrap.Modal('#deleteConfirmModal');
-            let deleteJobId = null;
+        const cardsParent = $("#cards_parent");
+        const loadingSpinner = $('#loading-spinner');
+        const emptyState = $('#empty-state');
+        const alertPlaceholder = $('#alertPlaceholder');
+        let deleteJobId = null;
+        let deleteModal = null;
+        function renderJobs(jobs, levels = {}, formats = {}, paginationHTML = '') {
+            cardsParent.empty();
 
+            if (!jobs || jobs.length === 0) {
+                emptyState.show();
+                return;
+            }
+
+            emptyState.hide();
+
+            jobs.forEach((job, index) => {
+                const jobCard = $(`
+                <div class="job-card" data-id="${job.id}" style="--delay: ${index}">
+                    <div class="job-card-header">
+                        <h4>${job.job_title}</h4>
+                    </div>
+                    <div class="job-card-body">
+                        <div class="job-meta">
+                            <div class="job-meta-item">
+                                <i class="fas fa-layer-group"></i>
+                                <span>Մակարդակ: ${levels[job.employee_level] || job.employee_level}</span>
+                            </div>
+                            <div class="job-meta-item">
+                                <i class="fas fa-briefcase"></i>
+                                <span>Փորձ: ${job.work_experience || 0} տարի</span>
+                            </div>
+                            <div class="job-meta-item">
+                                <i class="fas fa-clock"></i>
+                                <span>Ժամեր: ${job.working_hours || 0} ժամ</span>
+                            </div>
+                            <div class="job-meta-item">
+                                <i class="fas fa-laptop-house"></i>
+                                <span>Ձևաչափ: ${formats[job.work_format] || job.work_format}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="job-card-footer">
+                        <a href="/jobs/${job.id}/show" class="job-action action-view">
+                            <i class="fas fa-eye"></i> Դիտել
+                        </a>
+                        <a href="/jobs/${job.id}/edit" class="job-action action-edit">
+                            <i class="fas fa-edit"></i> Խմբագրել
+                        </a>
+                        <button class="job-action action-delete delete-btn" data-id="${job.id}">
+                            <i class="fas fa-trash"></i> Ջնջել
+                        </button>
+                    </div>
+                </div>
+            `);
+                cardsParent.append(jobCard);
+            });
+
+            if (paginationHTML) {
+                cardsParent.append(`
+                <div class="pagination-container" style="width: 100%; margin-top: 20px; display: flex; justify-content: center;">
+                    ${paginationHTML}
+                </div>
+            `);
+            }
+        }
+        function showAlert(message, type = 'success') {
+            const wrapper = $(`
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert" style="box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        `);
+            alertPlaceholder.append(wrapper);
+
+            setTimeout(() => {
+                $(wrapper).fadeOut(400, () => wrapper.remove());
+            }, 3000);
+        }
+        function loadMyJobs(filters = {}) {
+            loadingSpinner.fadeIn(300);
+            cardsParent.css('opacity', '0.7');
+            filters.creator_id = {{ auth()->id() }};
+            $.ajax({
+                url: '/jobs/filter',
+                method: 'GET',
+                data: filters,
+                success: function(data) {
+                    renderJobs(data.jobs, data.levels, data.formats, data.links);
+                },
+                error: function(xhr) {
+                    console.error("Filter error:", xhr.responseText);
+                    showAlert('Ֆիլտրման սխալ։ Խնդրում ենք փորձել ավելի ուշ։', 'danger');
+                },
+                complete: function() {
+                    loadingSpinner.fadeOut(300);
+                    cardsParent.css('opacity', '1');
+                }
+            });
+        }
+        function restoreFilters() {
+            const savedFilters = localStorage.getItem('myJobsFilters');
+            if (savedFilters) {
+                try {
+                    const filters = JSON.parse(savedFilters);
+                    $('#filter_job_title').val(filters.job_title || '');
+                    $('#filter_employee_level').val(filters.employee_level || '');
+                    $('#filter_work_experience').val(filters.work_experience || '');
+                    $('#filter_work_hours').val(filters.working_hours || '');
+                    $('#filter_work_format').val(filters.work_format || '');
+                    $('#filter_sort').val(filters.sort || 'newest');
+                    return filters;
+                } catch (e) {
+                    localStorage.removeItem('myJobsFilters');
+                }
+            }
+            return null;
+        }
+        $(document).ready(function () {
+            deleteModal = new bootstrap.Modal('#deleteConfirmModal');
             $('#filterToggle').on('click', function() {
                 const $filterSection = $('#filterSection');
                 const $toggleBtn = $(this);
-
                 $filterSection.toggleClass('collapsed');
                 $toggleBtn.toggleClass('collapsed');
-
-                // Store state
                 localStorage.setItem('filterCollapsed', $filterSection.hasClass('collapsed'));
             });
-
             if (localStorage.getItem('filterCollapsed') === 'true') {
                 $('#filterSection').addClass('collapsed');
                 $('#filterToggle').addClass('collapsed');
             }
-
-            function showAlert(message, type = 'success') {
-                const wrapper = $(`
-                    <div class="alert alert-${type} alert-dismissible fade show" role="alert" style="box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
-                        ${message}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                `);
-                alertPlaceholder.append(wrapper);
-
-                setTimeout(() => {
-                    $(wrapper).fadeOut(400, () => wrapper.remove());
-                }, 3000);
-            }
-
-            function renderJobs(jobs, levels = {}, formats = {}) {
-                cardsParent.empty();
-
-                if (!jobs || jobs.length === 0) {
-                    emptyState.show();
-                    return;
-                }
-
-                emptyState.hide();
-
-                jobs.forEach((job, index) => {
-                    const jobCard = $(`
-                        <div class="job-card" data-id="${job.id}" style="--delay: ${index}">
-                            <div class="job-card-header">
-                                <h4>${job.job_title}</h4>
-                            </div>
-                            <div class="job-card-body">
-                                <div class="job-meta">
-                                    <div class="job-meta-item">
-                                        <i class="fas fa-layer-group"></i>
-                                        <span>Մակարդակ: ${levels[job.employee_level] || job.employee_level}</span>
-                                    </div>
-                                    <div class="job-meta-item">
-                                        <i class="fas fa-briefcase"></i>
-                                        <span>Փորձ: ${job.work_experience || 0} տարի</span>
-                                    </div>
-                                    <div class="job-meta-item">
-                                        <i class="fas fa-clock"></i>
-                                        <span>Ժամեր: ${job.working_hours || 0} ժամ</span>
-                                    </div>
-                                    <div class="job-meta-item">
-                                        <i class="fas fa-laptop-house"></i>
-                                        <span>Ձևաչափ: ${formats[job.work_format] || job.work_format}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="job-card-footer">
-                                <a href="/jobs/${job.id}/show" class="job-action action-view">
-                                    <i class="fas fa-eye"></i> Դիտել
-                                </a>
-                                <a href="/jobs/${job.id}/edit" class="job-action action-edit">
-                                    <i class="fas fa-edit"></i> Խմբագրել
-                                </a>
-                                <button class="job-action action-delete delete-btn" data-id="${job.id}">
-                                    <i class="fas fa-trash"></i> Ջնջել
-                                </button>
-                            </div>
-                        </div>
-                    `);
-                    cardsParent.append(jobCard);
-                });
-            }
-
-            function loadMyJobs(filters = {}) {
-                loadingSpinner.fadeIn(300);
-                cardsParent.css('opacity', '0.7');
-
-                const timeout = setTimeout(() => {
-                    loadingSpinner.fadeOut(300);
-                    cardsParent.css('opacity', '1');
-                    showAlert('Բեռնումը ժամանակավորապես խափանված է։ Խնդրում ենք փորձել ավելի ուշ։', 'warning');
-                }, 10000);
-
-                filters.creator_id = {{ auth()->id() }};
-
-                $.ajax({
-                    url: '/jobs/filter',
-                    method: 'GET',
-                    data: filters,
-                    success: function(data) {
-                        clearTimeout(timeout);
-                        if (Array.isArray(data.jobs) && data.jobs.length > 0)
-                        {
-                            if (filters.sort === 'oldest') {
-                                data.jobs.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-                            } else {
-                                data.jobs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-                            }
-                            renderJobs(data.jobs, data.levels, data.formats);
-                        } else {
-                            renderJobs([]);
-                        }
-                    },
-                    error: function(xhr) {
-                        clearTimeout(timeout);
-                        console.error("Filter error:", xhr.responseText);
-                        showAlert('Ֆիլտրման սխալ։ Խնդրում ենք փորձել ավելի ուշ։', 'danger');
-                    },
-                    complete: function() {
-                        loadingSpinner.fadeOut(300);
-                        cardsParent.css('opacity', '1');
-                    }
-                });
-            }
-
             $(document).on('click', '.delete-btn', function (e) {
                 e.preventDefault();
                 deleteJobId = $(this).data('id');
                 deleteModal.show();
             });
-
             $('#confirmDeleteBtn').on('click', function () {
                 if (!deleteJobId) return;
-
                 $.ajax({
                     url: `/jobs/${deleteJobId}/delete`,
                     type: 'POST',
@@ -721,7 +716,6 @@
                     }
                 });
             });
-
             $('#filter_btn').on('click', function() {
                 const filters = {
                     job_title: $('#filter_job_title').val(),
@@ -734,34 +728,29 @@
                 localStorage.setItem('myJobsFilters', JSON.stringify(filters));
                 loadMyJobs(filters);
             });
-
-            function restoreFilters() {
-                const savedFilters = localStorage.getItem('myJobsFilters');
-                if (savedFilters) {
-                    try {
-                        const filters = JSON.parse(savedFilters);
-                        $('#filter_job_title').val(filters.job_title || '');
-                        $('#filter_employee_level').val(filters.employee_level || '');
-                        $('#filter_work_experience').val(filters.work_experience || '');
-                        $('#filter_work_hours').val(filters.working_hours || '');
-                        $('#filter_work_format').val(filters.work_format || '');
-                        $('#filter_sort').val(filters.sort || 'newest');
-                        return filters;
-                    } catch (e) {
-                        localStorage.removeItem('myJobsFilters');
-                    }
-                }
-                return null;
-            }
-
             $('#clear_filters').on('click', function() {
                 $('.filter-control').val('');
                 $('#filter_sort').val('newest');
                 loadMyJobs({ sort: 'newest' });
                 localStorage.removeItem('myJobsFilters');
             });
+            $(document).on('click', '.pagination a', function(e) {
+                e.preventDefault();
+                const url = $(this).attr('href');
+                const page = url.match(/page=(\d+)/)?.[1];
 
-            // Load jobs on page load
+                const filters = {
+                    job_title: $('#filter_job_title').val(),
+                    employee_level: $('#filter_employee_level').val(),
+                    work_experience: $('#filter_work_experience').val(),
+                    working_hours: $('#filter_work_hours').val(),
+                    work_format: $('#filter_work_format').val(),
+                    sort: $('#filter_sort').val(),
+                    creator_id: {{ auth()->id() }},
+                    page: page
+                };
+                loadMyJobs(filters);
+            });
             const savedFilters = restoreFilters();
             if (savedFilters) {
                 loadMyJobs(savedFilters);
@@ -769,5 +758,4 @@
                 loadMyJobs({ sort: 'newest' });
             }
         });
-    </script>
-@endsection
+    </script>@endsection

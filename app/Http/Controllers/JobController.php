@@ -23,14 +23,18 @@ class JobController extends Controller
             $query->where('job_title', 'like', '%'.$request->search.'%');
         }
 
-        $jobs = $query->orderBy('created_at', 'DESC')->get();
+        $jobs = $query->orderBy('created_at', 'DESC')->paginate(4);
 
         return response()->json([
-            'jobs' => $jobs,
+            'jobs' => $jobs->items(),
+            'links' => $jobs->links('pagination::bootstrap-5')->render(),
+            'current_page' => $jobs->currentPage(),
+            'last_page' => $jobs->lastPage(),
             'levels' => config('job.levels'),
             'formats' => config('job.formats')
         ]);
     }
+
     public function show($id)
     {
         $job = Workplace::with("user")->findOrFail($id);
@@ -99,13 +103,17 @@ class JobController extends Controller
             $query->orderBy('created_at', 'DESC');
         }
 
-        $jobs = $query->get();
+        $jobs = $query->paginate(4);
 
         return response()->json([
-            'jobs' => $jobs,
+            'jobs' => $jobs->items(),
+            'links' => $jobs->links('pagination::bootstrap-5')->render(),
+            'current_page' => $jobs->currentPage(),
+            'last_page' => $jobs->lastPage(),
             'levels' => config('job.levels'),
-            'formats' => config('job.formats'),
+            'formats' => config('job.formats')
         ]);
+
     }
 
 
@@ -173,14 +181,22 @@ class JobController extends Controller
     {
         return view('jobseeker.my_jobs');
     }
-    public function my_jobs()
+    public function my_jobs(Request $request)
     {
         $my_id = auth()->id();
-        $my_jobs = Workplace::where('job_creator_id', $my_id)->latest()->get();
+        $query = Workplace::where('job_creator_id', $my_id);
+        if ($request->filled('search')) {
+            $query->where('job_title', 'like', '%' . $request->search . '%');
+        }
+        $my_jobs = $query->latest()->paginate(4);
         return response()->json([
-            "data" => $my_jobs,
+            'jobs' => $my_jobs->items(),
+            'links' => $my_jobs->links('pagination::bootstrap-5')->render(),
+            'current_page' => $my_jobs->currentPage(),
+            'last_page' => $my_jobs->lastPage(),
             'levels' => config('job.levels'),
             'formats' => config('job.formats'),
-            ]);
+        ]);
     }
+
 }
