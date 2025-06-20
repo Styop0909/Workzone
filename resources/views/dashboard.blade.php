@@ -2,7 +2,7 @@
 
 @section('page_title')
     Dashboard
-    
+
 @endsection
 
 <style>
