@@ -9,7 +9,9 @@
         overflow-x: hidden;
         overflow-y: auto;
     }
-
+    .small{
+        display: none;
+    }
     .box {
         display: flex;
         justify-content: space-between;
@@ -757,7 +759,6 @@
             });
         });
 
-        // ✅ Սա թող մնա այսպես, դուրս
         $(document).on('click', '.pagination a', function(e) {
             e.preventDefault();
             const url = $(this).attr('href');
